@@ -31,7 +31,7 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
           if (userDoc.exists()) {
             router.push("/dashboard");
           } else {
-            router.push("/scoreForm");
+            router.push("/onboard");
           }
       
           setHasRedirected(true);

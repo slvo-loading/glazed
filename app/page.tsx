@@ -1,6 +1,6 @@
 'use client'
 import { useState } from "react";
-import { sendMagicLink, completeSignIn } from "./utils/auth";
+import { sendMagicLink } from "./utils/auth";
 
 
 export default function Home() {
