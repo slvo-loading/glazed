@@ -96,8 +96,8 @@ export default function ResumeForm({ handleCount, handleResume }: ResumeFormProp
                         handlePrivacy={handlePrivacy}
                         handleError={handleError}
                         />
-                        {error && <span>{error}</span>}
                         <button onClick={handleSubmit}>Next</button>
+                        {error && <span>{error}</span>}
                     </motion.div>
                 }
 
@@ -114,8 +114,10 @@ export default function ResumeForm({ handleCount, handleResume }: ResumeFormProp
                         handleIsFile={handleIsFile}
                         resumeCount={resumeCount}
                         parsedExperiences={experiences}
+                        handleError={handleError}
                         />
                         <button onClick={handleSubmit}>Next</button>
+                        {error && <span>{error}</span>}
                     </motion.div>
                 }
                 
