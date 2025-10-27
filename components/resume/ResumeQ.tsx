@@ -9,8 +9,7 @@ type Experience = {
 }
 
 interface ResumeQProps {
-    handleResume: (resume: string) => void;
-    handleIsFile: (input: boolean) => void;
+    handleResume: (resume: File | Experience[]) => void;
     resumeCount: number;
     parsedExperiences?: Experience[];
     privacy?: boolean;
@@ -19,7 +18,7 @@ interface ResumeQProps {
 }
 
 
-export default function ResumeQ({ handleResume, handleIsFile, resumeCount, parsedExperiences, privacy, handlePrivacy, handleError }: ResumeQProps) {
+export default function ResumeQ({ handleResume, resumeCount, parsedExperiences, privacy, handlePrivacy, handleError }: ResumeQProps) {
 
     const [file, setFile] = useState<File | null>(null)
     const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -29,8 +28,6 @@ export default function ResumeQ({ handleResume, handleIsFile, resumeCount, parse
     const[selectedIndex, setSelectedIndex] = useState<number | null>(null)
     const [selected, setSelected] = useState<Experience | null>(null)
 
-    const [loading, setLoading] = useState<boolean>(false)
-    const [error, setError] = useState<string>('')
 
     const handleDelete = (i: number) => {
         setExperiences((prev) => prev.filter((_, index) => index !== i));
@@ -64,7 +61,6 @@ export default function ResumeQ({ handleResume, handleIsFile, resumeCount, parse
 
     const deleteFile = () => {
         setFile(null);
-        handleIsFile(false)
       
         if (fileInputRef.current) {
           fileInputRef.current.value = ""; 
@@ -73,11 +69,11 @@ export default function ResumeQ({ handleResume, handleIsFile, resumeCount, parse
 
     useEffect(() => {
         if (file) {
-            handleResume('resume set to file')
+            handleResume(file)
         } else if (experiences.length > 0) {
-            handleResume('resume set to experiences')
+            handleResume(experiences)
         } else {
-            handleResume('')
+            handleResume([])
         }
     }, [file, experiences])
 
@@ -88,7 +84,7 @@ export default function ResumeQ({ handleResume, handleIsFile, resumeCount, parse
                     <button onClick={handlePrivacy}>{privacy ? "Private" : "Public"}</button>
                     <label htmlFor="resume">Upload Resume:</label>
                     <input ref={fileInputRef} type="file" id="resume" name="resume" accept="application/pdf" 
-                    onChange={e => {setFile(e.target.files?.[0] ?? null); handleIsFile(true); handleError()}}/>
+                    onChange={e => {setFile(e.target.files?.[0] ?? null); handleError()}}/>
                     <button onClick={deleteFile}>Delete File</button>
                     <hr/>
                 </div>

@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import ResumeForm from '../../components/resume/ResumeForm'
 import TranscriptForm from '../../components/transcript/TranscriptForm'
 import GithubForm from '../../components/GithubForm'
@@ -7,20 +7,29 @@ import Score from '../../components/Score'
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 
+type Experience = {
+    company: string,
+    responsibilities: string,
+}
+
 export default function Onboard() {
     const router = useRouter();
     const [count, setCount] = useState<number>(1)
-    const [resume, setResume] = useState<string | null>(null)
+    const [resume, setResume] = useState<Experience[] | null>(null)
     const [transcript, setTranscript] = useState<string | null>(null)
     const [linkedin, setLinkedin] = useState<string | null>(null)
     const [leetcode, setLeetcode] = useState<string | null>(null)
     const [github, setGithub] = useState<string | null>(null)
 
-    const handleCount = () => {
-        setCount(prev => prev + 1)
-    }
+    const handleCount = useCallback(() => {
+        const handleCount = () => {
+            setCount(prev => prev + 1)
+        }
 
-    const handleResume = (input: string) => {
+        handleCount()
+    }, [])
+
+    const handleResume = (input: Experience[]) => {
         setResume(input)
     }
 

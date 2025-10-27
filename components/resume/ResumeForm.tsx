@@ -2,10 +2,13 @@
 import { useState, useEffect } from 'react'
 import ResumeQ from './ResumeQ'
 import { AnimatePresence, motion } from "framer-motion";
+import { storage } from '../../app/utils/firebase'
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+
 
 interface ResumeFormProps {
     handleCount : () => void;
-    handleResume: (resume: string) => void;
+    handleResume: (resume: Experience[]) => void;
 }
 
 type Experience = {
@@ -15,46 +18,65 @@ type Experience = {
 
 export default function ResumeForm({ handleCount, handleResume }: ResumeFormProps) {
     const [resumeCount, setResumeCount] = useState<number>(1)
-    const [isFile, setIsFile] = useState<boolean>(false)
-    const [resume, setResume] = useState<string>('')
+    const [resume, setResume] = useState<File| Experience[] | null>(null)
     const[privacy, setPrivacy] = useState<boolean>(false)
     const [error, setError] = useState<string | null>('')
+    const [experiences, setExperiences] = useState<Experience[]>([])
+    const [loading, setLoading] = useState<boolean>(false)
 
-    const [experiences, setExperiences] = useState<Experience[]>()
+    const uploadToFirebase = async(file: File) => {
+        const fileRef = ref(storage, `resumes/${file.name}-${Date.now()}`);
 
-    const handleSubmit = () => {
-        if (resume.length === 0) { //basically if there is no resume
-            setError('no resume item submitted')
-            return;
+        try {
+            await uploadBytes(fileRef, file);
+            const resumeUrl = await getDownloadURL(fileRef);
+            return { resumeUrl };
+        } catch (err) {
+            console.error("Firebase upload failed:", err);
+            return { uploadError: "Upload failed" };
         }
+    }
 
-        let num = 0;
-        let parseSuccess = false; //simulting parsing for now
-        if (isFile) {
-            //parse file and save the raw file to firebase
-            parseSuccess = true;
-            if (parseSuccess) {
-                setExperiences([{company: 'nasa', responsibilities: 'nasaaaaa'}])
-                // this is the result of the parse it'll prob be differen't but we'll work with that later 
-                num = 1;
+    const handleSubmit = async() => {
+        setLoading(true)
+        try {
+            if (resume === null) { //basically if there is no resume
+                throw new Error ("No resume uploaded.")
             }
-        } else {
-            //save to firebase json to firebase
-            handleResume('saved manual to firebase')
-            num = 2
-            setIsFile(false)
+
+
+            if (resume instanceof File) {
+                const { resumeUrl, uploadError } = await uploadToFirebase(resume)
+
+                if (uploadError) {
+                    throw new Error (uploadError)
+                }
+
+                const res = await fetch("/api/parse-resume", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ resumeUrl }),
+                });
+
+                if (!res.ok) throw new Error("Parsing failed");
+
+                const data = await res.json();
+                setExperiences(data.experiences)
+                setResumeCount(prev => prev + 1)
+            } else {
+                handleResume(resume)
+                setResumeCount(prev => prev + 2)
+            }
+        } catch (error) {
+            setError(error instanceof Error ? error.message : String(error))
+            console.error(error)
+        } finally {
+            setLoading(false)
+            setResume(null)
         }
-
-        setResume('')
-        setIsFile(false)
-        setResumeCount(prev => prev + num)
     }
 
-    const handleIsFile = (input: boolean) => {
-        setIsFile(input)
-    }
-
-    const handleRawResume = (input: string) => {
+    const handleRawResume = (input: File | Experience[]) => {
         setResume(input)
     }
 
@@ -70,11 +92,15 @@ export default function ResumeForm({ handleCount, handleResume }: ResumeFormProp
         if (resumeCount >= 3) {
             handleCount()
         }
-    }, [resumeCount])
+    }, [resumeCount, handleCount])
 
     useEffect(() => {
         console.log(resume)
     }, [resume])
+
+    if (loading) {
+        return(<div>Loading...</div>)
+    }
 
 
     return(
@@ -90,7 +116,6 @@ export default function ResumeForm({ handleCount, handleResume }: ResumeFormProp
                     >
                         <ResumeQ 
                         handleResume={handleRawResume}
-                        handleIsFile={handleIsFile}
                         resumeCount={resumeCount}
                         privacy={privacy}
                         handlePrivacy={handlePrivacy}
@@ -111,7 +136,6 @@ export default function ResumeForm({ handleCount, handleResume }: ResumeFormProp
                     >
                         <ResumeQ 
                         handleResume={handleRawResume}
-                        handleIsFile={handleIsFile}
                         resumeCount={resumeCount}
                         parsedExperiences={experiences}
                         handleError={handleError}
