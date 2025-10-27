@@ -1,9 +1,9 @@
 'use client'
 import { useState, useEffect } from 'react'
-import ResumeForm from '../../components/score/ResumeForm'
-import TranscriptForm from '../../components/score/TranscriptForm'
-import GithubForm from '../../components/score/GithubForm'
-import Score from '../../components/score/Score'
+import ResumeForm from '../../components/resume/ResumeForm'
+import TranscriptForm from '../../components/TranscriptForm'
+import GithubForm from '../../components/GithubForm'
+import Score from '../../components/Score'
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 
@@ -50,7 +50,7 @@ export default function Onboard() {
     return (
       <div className='flex items-center justify-center h-screen w-screen'>
         <AnimatePresence mode="wait">
-            
+
         {count === 1 && 
             <motion.div
                 key="step1"
