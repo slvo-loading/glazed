@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { ResumeEdit } from './ResumeEdit'
 
 type Experience = {
@@ -8,85 +8,103 @@ type Experience = {
     responsibilities: string,
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function ResumeQ({ handleResume } : { handleResume: any }) {
+interface ResumeQProps {
+    handleResume: (resume: string) => void;
+    handleIsFile: (input: boolean) => void;
+    resumeCount: number;
+    parsedExperiences?: Experience[];
+    privacy?: boolean;
+    handlePrivacy?: () => void;
+}
+
+
+export default function ResumeQ({ handleResume, handleIsFile, resumeCount, parsedExperiences, privacy, handlePrivacy }: ResumeQProps) {
 
     const [file, setFile] = useState<File | null>(null)
-    const [experiences, setExperiences] = useState<{ [key: string] :Experience}>({})
+    const fileInputRef = useRef<HTMLInputElement | null>(null);
+    const [experiences, setExperiences] = useState<Experience[]>(parsedExperiences || [])
     const [open, setOpen] = useState<boolean>(false)
 
-    const [selectdedCo, setSelectdedCo] = useState<string>('')
-    const [selectedR, setSelectedR] = useState<string>('')
-    const [selectedId, setSelectedId] = useState<string>('')
+    const[selectedIndex, setSelectedIndex] = useState<number | null>(null)
+    const [selected, setSelected] = useState<Experience | null>(null)
 
-    const [privacy, setPrivacy] = useState<boolean>(true)
     const [loading, setLoading] = useState<boolean>(false)
     const [error, setError] = useState<string>('')
 
+    const handleDelete = (i: number) => {
+        setExperiences((prev) => prev.filter((_, index) => index !== i));
+    };
 
-    const saveExperience = (experience: Experience, id: string) => {
-        setExperiences((prev) => {
-            const newExperiences = { ...prev };
-            newExperiences[id] = experience;
-            return newExperiences;
-        })
-        setOpen(false)
-        setSelectdedCo('')
-        setSelectedId('')
-        setSelectedR('')
+    const handleEdit = (i: number) => {
+        setSelectedIndex(i)
+        setSelected(experiences[i])
+        setOpen(true)
     }
 
     const close = () => {
         setOpen(false)
+        setSelectedIndex(null)
+        setSelected(null)
     }
 
-    const handleDelete = (id: string) => {
-        setExperiences((prev) => {
-            const newExperiences = { ...prev };
-            delete newExperiences[id];
-            return newExperiences;
-        });
-    };
+    const saveExperience = (experience: Experience) => {
+        if (selectedIndex !== null) {
+            setExperiences((prev) => {
+                const newExperiences = [ ...prev ];
+                newExperiences[selectedIndex] = experience;
+                return newExperiences;
+            })
+        } else {
+            setExperiences(prev => [...prev, experience])
+        }
 
-    const handleEdit = (co: string, res: string, id: string) => {
-        setSelectdedCo(co)
-        setSelectedR(res)
-        setSelectedId(id)
-        setOpen(true)
+        close()
+    }
+
+    const deleteFile = () => {
+        setFile(null);
+        handleIsFile(false)
+      
+        if (fileInputRef.current) {
+          fileInputRef.current.value = ""; 
+        }
     }
 
     useEffect(() => {
         if (file) {
-            handleResume(file)
-        } else {
-            handleResume(experiences)
+            handleResume('resume set to file')
+        } else if (experiences.length > 0) {
+            handleResume('resume set to experiences')
         }
     }, [file, experiences])
 
-
     return (
         <div>
+            {resumeCount === 1 && 
+                <div style={{display:'flex', flexDirection:'column'}}>
+                    <button onClick={handlePrivacy}>{privacy ? "Private" : "Public"}</button>
+                    <label htmlFor="resume">Upload Resume:</label>
+                    <input ref={fileInputRef} type="file" id="resume" name="resume" accept="application/pdf" 
+                    onChange={e => {setFile(e.target.files?.[0] ?? null); handleIsFile(true)}}/>
+                    <button onClick={deleteFile}>Delete File</button>
+                    <hr/>
+                </div>
+            }
 
-            <label htmlFor="resume">Upload Resume:</label>
-            <input type="file" id="resume" name="resume" accept="application/pdf" 
-            onChange={e => setFile(e.target.files?.[0] ?? null)}/>
-
-            <hr/>
-
-            <span>Work Experience</span>
-            <button onClick={() => setOpen(prev => !prev)}>Add Experience</button>
-            {Object.entries(experiences).length > 0 && Object.entries(experiences).map(([id, experience]) => {
+             <span>Work Experience</span>
+             <button onClick={() => setOpen(prev => !prev)}>Add Experience</button>
+            {experiences.map((experience, i) => {
                 return (
-                    <div key={id}>
+                    <div key={i}>
                         <span>Company: {experience.company}</span>
                         <p>Responsibilities: {experience.responsibilities}</p>
-                        <button onClick={() => handleEdit(experience.company, experience.responsibilities, id)}>Edit</button>
-                        <button onClick={() => handleDelete(id)}>Delete</button>
+                        <button onClick={() => handleEdit(i)}>Edit</button>
+                        <button onClick={() => handleDelete(i)}>Delete</button>
                     </div>
                 )
             })}
 
-            {open && <ResumeEdit saveExperience={saveExperience} close={close} idE={selectedId} companyE={selectdedCo} responsibilitiesE={selectedR}/>}
+            {open && <ResumeEdit saveExperience={saveExperience} close={close} selected={selected}/>}
 
         </div>
     )

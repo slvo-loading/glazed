@@ -1,23 +1,115 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import ResumeQ from './ResumeQ'
+import { AnimatePresence, motion } from "framer-motion";
 
 interface ResumeFormProps {
     handleCount : () => void;
     handleResume: (resume: string) => void;
 }
 
+type Experience = {
+    company: string,
+    responsibilities: string,
+}
+
 export default function ResumeForm({ handleCount, handleResume }: ResumeFormProps) {
+    const [resumeCount, setResumeCount] = useState<number>(1)
+    const [isFile, setIsFile] = useState<boolean>(false)
     const [resume, setResume] = useState<string>('')
+    const[privacy, setPrivacy] = useState<boolean>(false)
+    const [error, setError] = useState<string>('')
+
+    const [experiences, setExperiences] = useState<Experience[]>()
 
     const handleSubmit = () => {
-        handleResume(resume)
-        handleCount()
+        if (!resume) {
+            setError('no resume item submitted')
+        }
+
+        let num = 0;
+        let parseSuccess = false; //simulting parsing for now
+        if (isFile) {
+            //parse
+            parseSuccess = true;
+            if (parseSuccess) {
+                //save to firebase
+                handleResume('saved pdf parse to firebase')
+                setExperiences([{company: 'nasa', responsibilities: 'nasaaaaa'}])
+                // this is the result of the parse it'll prob be differen't but we'll work with that later 
+                num = 1;
+            }
+        } else {
+            //save to firebase
+            handleResume('saved manual to firebase')
+            num = 2
+        }
+
+        setIsFile(false)
+        setResume('')
+        setResumeCount(prev => prev + num)
     }
+
+    const handleIsFile = (input: boolean) => {
+        setIsFile(input)
+    }
+
+    const handleRawResume = (input: string) => {
+        setResume(input)
+    }
+
+    const handlePrivacy = () => {
+        setPrivacy(prev => !prev)
+    }
+
+    useEffect(() => {
+        if (resumeCount >= 3) {
+            handleCount()
+        }
+    }, [resumeCount])
+
 
     return(
         <div>
-            <input type='text' value={resume} onChange={e => setResume(e.target.value)} placeholder="enter resume"/>
-            <button onClick={handleSubmit}>Submit</button>
+            <AnimatePresence mode="wait">
+                {resumeCount === 1 && 
+                    <motion.div
+                        key="step1"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{ duration: 0.3 }}
+                    >
+                        <ResumeQ 
+                        handleResume={handleRawResume}
+                        handleIsFile={handleIsFile}
+                        resumeCount={resumeCount}
+                        privacy={privacy}
+                        handlePrivacy={handlePrivacy}
+                        />
+                        <button onClick={handleSubmit}>Next</button>
+                    </motion.div>
+                }
+
+                {resumeCount === 2 && 
+                    <motion.div
+                        key="step2"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{ duration: 0.3 }}
+                    >
+                        <ResumeQ 
+                        handleResume={handleRawResume}
+                        handleIsFile={handleIsFile}
+                        resumeCount={resumeCount}
+                        parsedExperiences={experiences}
+                        />
+                        <button onClick={handleSubmit}>Next</button>
+                    </motion.div>
+                }
+                
+            </AnimatePresence>
         </div>
     )
 }

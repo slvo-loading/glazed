@@ -1,23 +1,24 @@
 'use client'
 import { useState } from 'react'
-import { v4 as uuidv4 } from "uuid";
 
-interface ResumeEditProps {
-    saveExperience: (data: { company: string; responsibilities: string }, id: string) => void;
-    close: () => void;
-    idE: string;
-    companyE: string;
-    responsibilitiesE: string;
+type Experience = {
+    company: string,
+    responsibilities: string,
 }
 
-export function ResumeEdit({ saveExperience, close, idE, companyE, responsibilitiesE }: ResumeEditProps) {
-    const [company, setCompany] = useState<string>(companyE ?? '')
-    const [responsibilities, setResponsibilities] = useState<string>(responsibilitiesE ?? '')
+interface ResumeEditProps {
+    saveExperience: (experience: Experience) => void;
+    close: () => void;
+    selected: Experience | null;
+}
+
+export function ResumeEdit({ saveExperience, close, selected}: ResumeEditProps) {
+    const [company, setCompany] = useState<string>(selected?.company ?? '')
+    const [responsibilities, setResponsibilities] = useState<string>(selected?.responsibilities ?? '')
     const [missingCo, setMissingCo] = useState<boolean>(false)
     const [missingR, setMissingR] = useState<boolean>(false)
     const [loading, setLoading] = useState<boolean>(false)
     const [warning, setWarning] = useState<boolean>(false)
-    const [id, setId] = useState<string>(idE || uuidv4())
 
     const handleSave = () => {
         setLoading(true)
@@ -40,7 +41,7 @@ export function ResumeEdit({ saveExperience, close, idE, companyE, responsibilit
             saveExperience({
                 company: company,
                 responsibilities: responsibilities
-            }, id)
+            })
         }
     }
 
