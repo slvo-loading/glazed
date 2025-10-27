@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import ResumeForm from '../../components/resume/ResumeForm'
-import TranscriptForm from '../../components/TranscriptForm'
+import TranscriptForm from '../../components/transcript/TranscriptForm'
 import GithubForm from '../../components/GithubForm'
 import Score from '../../components/Score'
 import { useRouter } from "next/navigation";
@@ -45,6 +45,10 @@ export default function Onboard() {
             router.push("/dashboard");
         }
     }, [count, router])
+
+    useEffect(() => {
+        console.log(`final resume saved: ${resume}`)
+    }, [resume])
 
 
     return (

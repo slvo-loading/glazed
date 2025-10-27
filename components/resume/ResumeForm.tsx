@@ -18,35 +18,35 @@ export default function ResumeForm({ handleCount, handleResume }: ResumeFormProp
     const [isFile, setIsFile] = useState<boolean>(false)
     const [resume, setResume] = useState<string>('')
     const[privacy, setPrivacy] = useState<boolean>(false)
-    const [error, setError] = useState<string>('')
+    const [error, setError] = useState<string | null>('')
 
     const [experiences, setExperiences] = useState<Experience[]>()
 
     const handleSubmit = () => {
-        if (!resume) {
+        if (resume.length === 0) { //basically if there is no resume
             setError('no resume item submitted')
+            return;
         }
 
         let num = 0;
         let parseSuccess = false; //simulting parsing for now
         if (isFile) {
-            //parse
+            //parse file and save the raw file to firebase
             parseSuccess = true;
             if (parseSuccess) {
-                //save to firebase
-                handleResume('saved pdf parse to firebase')
                 setExperiences([{company: 'nasa', responsibilities: 'nasaaaaa'}])
                 // this is the result of the parse it'll prob be differen't but we'll work with that later 
                 num = 1;
             }
         } else {
-            //save to firebase
+            //save to firebase json to firebase
             handleResume('saved manual to firebase')
             num = 2
+            setIsFile(false)
         }
 
-        setIsFile(false)
         setResume('')
+        setIsFile(false)
         setResumeCount(prev => prev + num)
     }
 
@@ -62,11 +62,19 @@ export default function ResumeForm({ handleCount, handleResume }: ResumeFormProp
         setPrivacy(prev => !prev)
     }
 
+    const handleError = () => {
+        setError(null)
+    }
+
     useEffect(() => {
         if (resumeCount >= 3) {
             handleCount()
         }
     }, [resumeCount])
+
+    useEffect(() => {
+        console.log(resume)
+    }, [resume])
 
 
     return(
@@ -86,7 +94,9 @@ export default function ResumeForm({ handleCount, handleResume }: ResumeFormProp
                         resumeCount={resumeCount}
                         privacy={privacy}
                         handlePrivacy={handlePrivacy}
+                        handleError={handleError}
                         />
+                        {error && <span>{error}</span>}
                         <button onClick={handleSubmit}>Next</button>
                     </motion.div>
                 }

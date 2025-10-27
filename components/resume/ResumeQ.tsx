@@ -15,10 +15,11 @@ interface ResumeQProps {
     parsedExperiences?: Experience[];
     privacy?: boolean;
     handlePrivacy?: () => void;
+    handleError:() => void;
 }
 
 
-export default function ResumeQ({ handleResume, handleIsFile, resumeCount, parsedExperiences, privacy, handlePrivacy }: ResumeQProps) {
+export default function ResumeQ({ handleResume, handleIsFile, resumeCount, parsedExperiences, privacy, handlePrivacy, handleError }: ResumeQProps) {
 
     const [file, setFile] = useState<File | null>(null)
     const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -75,6 +76,8 @@ export default function ResumeQ({ handleResume, handleIsFile, resumeCount, parse
             handleResume('resume set to file')
         } else if (experiences.length > 0) {
             handleResume('resume set to experiences')
+        } else {
+            handleResume('')
         }
     }, [file, experiences])
 
@@ -85,14 +88,14 @@ export default function ResumeQ({ handleResume, handleIsFile, resumeCount, parse
                     <button onClick={handlePrivacy}>{privacy ? "Private" : "Public"}</button>
                     <label htmlFor="resume">Upload Resume:</label>
                     <input ref={fileInputRef} type="file" id="resume" name="resume" accept="application/pdf" 
-                    onChange={e => {setFile(e.target.files?.[0] ?? null); handleIsFile(true)}}/>
+                    onChange={e => {setFile(e.target.files?.[0] ?? null); handleIsFile(true); handleError()}}/>
                     <button onClick={deleteFile}>Delete File</button>
                     <hr/>
                 </div>
             }
 
              <span>Work Experience</span>
-             <button onClick={() => setOpen(prev => !prev)}>Add Experience</button>
+             <button onClick={() => {setOpen(prev => !prev); handleError()}}>Add Experience</button>
             {experiences.map((experience, i) => {
                 return (
                     <div key={i}>
