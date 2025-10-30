@@ -38,17 +38,19 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
         });
 
         const userData = await res.json();
-        console.log(userData)
         setUser(userData)
+
+        if (!userData.onboardStatus) {
+          router.push('/onboard')
+        } else {
+          router.push('/dashboard')
+        }
 
       } catch (error) {
         console.log(error)
       }
     }
 
-    useEffect(() => {
-      console.log(user)
-    }, [user])
 
     return <UserContext.Provider value={user}>{children}</UserContext.Provider>;
 };
