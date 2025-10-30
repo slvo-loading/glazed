@@ -2,14 +2,10 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { ResumeEdit } from './ResumeEdit'
-
-type Experience = {
-    company: string,
-    responsibilities: string,
-}
+import { Experience } from '../../utils/types'
 
 interface ResumeQProps {
-    handleResume: (resume: File | Experience[]) => void;
+    handleResume: (resume: File | Experience[] | null) => void;
     resumeCount: number;
     parsedExperiences?: Experience[];
     privacy?: boolean;
@@ -73,9 +69,13 @@ export default function ResumeQ({ handleResume, resumeCount, parsedExperiences, 
         } else if (experiences.length > 0) {
             handleResume(experiences)
         } else {
-            handleResume([])
+            handleResume(null)
         }
     }, [file, experiences])
+
+    useEffect(() => {
+        console.log("experiences received in resumeq", experiences)
+    }, [experiences])
 
     return (
         <div>

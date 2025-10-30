@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { PDFParse } from "pdf-parse";
 import OpenAI from "openai";
 import { zodTextFormat } from "openai/helpers/zod";
+import { PDFParse } from "pdf-parse";
 import { z } from "zod";
 
 const openai = new OpenAI();
@@ -17,6 +17,9 @@ const ResumeSchema = z.object({
 
 export async function POST(req: Request) {
   try {
+
+
+    // PARSE RESUME
     const { resumeUrl } = await req.json();
     console.log("Received resume URL:", resumeUrl);
 
@@ -26,6 +29,7 @@ export async function POST(req: Request) {
 
     console.log("PDF preview:", resumeText.substring(0, 500));
 
+    //AI PARSING
     const prompt = `
     Extract ONLY work experience into JSON with this structure:
 

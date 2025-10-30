@@ -1,46 +1,54 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 'use client'
 import { createContext, useContext, useState, useEffect } from "react";
-import { auth } from "./firebase";
 import { onAuthStateChanged, User } from "firebase/auth";
 import { useRouter } from "next/navigation";
-import { db } from '../utils/firebase'
-import { getDoc, doc } from 'firebase/firestore';
+import { UserData } from './types'
+import { auth } from './firebase'
 
-const UserContext = createContext<User | null>(null);
+const UserContext = createContext<UserData | null>(null);
 
 export const UserProvider = ({ children }: { children: React.ReactNode }) => {
-    const [user, setUser] = useState<User | null>(null);
+    const [user, setUser] = useState<UserData | null>(null);
     const [hasRedirected, setHasRedirected] = useState(false);
     const router = useRouter();
 
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+        const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
             console.log("Auth state changed, user:", firebaseUser);
-            setUser(firebaseUser);
+            
+            if (firebaseUser) {
+              console.log("Auth state changed, user:", firebaseUser);
+              const token = await firebaseUser.getIdToken(true); // force refresh
+              await fetchUserData(token);
+            } else {
+              setUser(null);
+            }
         });
         return () => unsubscribe();
     }, []);
 
+    const fetchUserData = async(token: string) => {
+      console.log('sending token in fethcuserdata', token)
+      try {
+        const res = await fetch("/api/user", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const userData = await res.json();
+        console.log(userData)
+        setUser(userData)
+
+      } catch (error) {
+        console.log(error)
+      }
+    }
+
     useEffect(() => {
-        const redirect = async () => {
-          if (!user || hasRedirected) return;
-      
-          const userDoc = await getDoc(doc(db, "users", user.uid));
-      
-          if (userDoc.exists()) {
-            router.push("/dashboard");
-          } else {
-            router.push("/onboard");
-          }
-      
-          setHasRedirected(true);
-        };
-      
-        redirect();
-    }, [user, router, hasRedirected]);
-
-
+      console.log(user)
+    }, [user])
 
     return <UserContext.Provider value={user}>{children}</UserContext.Provider>;
 };

@@ -3,14 +3,12 @@ import { useState } from 'react'
 
 interface TranscriptFormProps {
     handleCount : () => void;
-    handleTranscript: (transcript: string) => void;
 }
 
-export default function ResumeForm({ handleCount, handleTranscript }: TranscriptFormProps) {
+export default function ResumeForm({ handleCount }: TranscriptFormProps) {
     const [transcript, setTranscript] = useState<string>('')
 
     const handleSubmit = () => {
-        handleTranscript(transcript)
         handleCount()
     }
 

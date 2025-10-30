@@ -1,64 +1,27 @@
 'use client'
-import { useState, useEffect, useCallback } from 'react'
-import ResumeForm from '../../components/resume/ResumeForm'
-import TranscriptForm from '../../components/transcript/TranscriptForm'
-import GithubForm from '../../components/GithubForm'
-import Score from '../../components/Score'
-import { useRouter } from "next/navigation";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion"
+import { useRouter } from "next/navigation"
+import { useCallback, useEffect, useState } from 'react'
+import GithubForm from '../components/GithubForm'
+import ResumeForm from '../components/resume/ResumeForm'
+import Score from '../components/Score'
+import TranscriptForm from '../components/transcript/TranscriptForm'
 
-type Experience = {
-    company: string,
-    responsibilities: string,
-}
+// fetch the part that we're on from the database
 
 export default function Onboard() {
     const router = useRouter();
     const [count, setCount] = useState<number>(1)
-    const [resume, setResume] = useState<Experience[] | null>(null)
-    const [transcript, setTranscript] = useState<string | null>(null)
-    const [linkedin, setLinkedin] = useState<string | null>(null)
-    const [leetcode, setLeetcode] = useState<string | null>(null)
-    const [github, setGithub] = useState<string | null>(null)
 
     const handleCount = useCallback(() => {
-        const handleCount = () => {
-            setCount(prev => prev + 1)
-        }
-
-        handleCount()
+        setCount(prev => prev + 1)
     }, [])
-
-    const handleResume = (input: Experience[]) => {
-        setResume(input)
-    }
-
-    const handleTranscript = (input: string) => {
-        setTranscript(input)
-    }
-
-    const handleLinkedin = (input: string) => {
-        setLinkedin(input)
-    }
-
-    const handleLeetcode = (input: string) => {
-        setLeetcode(input)
-    }
-
-    const handleGithub = (input: string) => {
-        setGithub(input)
-    }
 
     useEffect(() => {
         if (count === 5) {
             router.push("/dashboard");
         }
     }, [count, router])
-
-    useEffect(() => {
-        console.log(`final resume saved: ${resume}`)
-    }, [resume])
-
 
     return (
       <div className='flex items-center justify-center h-screen w-screen'>
@@ -72,7 +35,7 @@ export default function Onboard() {
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.3 }}
             >
-                <ResumeForm handleCount={handleCount} handleResume={handleResume}/>
+                <ResumeForm handleCount={handleCount}/>
             </motion.div>
         }
 
@@ -84,7 +47,7 @@ export default function Onboard() {
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.3 }}
             >
-                <TranscriptForm handleCount={handleCount} handleTranscript={handleTranscript}/>
+                <TranscriptForm handleCount={handleCount}/>
             </motion.div>
         }
 
@@ -98,9 +61,6 @@ export default function Onboard() {
             >
                 <GithubForm
                 handleCount={handleCount}
-                handleLinkedin={handleLinkedin}
-                handleLeetcode={handleLeetcode}
-                handleGithub={handleGithub}
                 />
             </motion.div>
         }

@@ -1,10 +1,6 @@
 'use client'
 import { useState } from 'react'
-
-type Experience = {
-    company: string,
-    responsibilities: string,
-}
+import { Experience } from '../../utils/types'
 
 interface ResumeEditProps {
     saveExperience: (experience: Experience) => void;
@@ -69,7 +65,7 @@ export function ResumeEdit({ saveExperience, close, selected}: ResumeEditProps) 
                 {missingR && <span>Please enter your responsibilities</span>}
             </div>
 
-            <button onClick={handleSave}>Save</button>
+            <button onClick={handleSave}>Add</button>
             <button onClick={handleWarning}>Close</button>
 
             {warning &&

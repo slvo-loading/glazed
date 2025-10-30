@@ -7,7 +7,6 @@ import { completeSignIn } from "../utils/auth";
 
 export default function CompleteSignIn() {
 
-
     useEffect(() => {
         const handleComplete = async () => {
             const user = await completeSignIn();

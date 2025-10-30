@@ -1,22 +1,18 @@
 'use client'
-import { useState, useEffect } from 'react'
-import ResumeQ from './ResumeQ'
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { AnimatePresence, motion } from "framer-motion";
-import { storage } from '../../app/utils/firebase'
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { useEffect, useState } from 'react';
+import { storage } from '../../utils/firebase';
+import ResumeQ from './ResumeQ';
+import { Experience } from '../../utils/types'
 
 
 interface ResumeFormProps {
     handleCount : () => void;
-    handleResume: (resume: Experience[]) => void;
 }
 
-type Experience = {
-    company: string,
-    responsibilities: string,
-}
 
-export default function ResumeForm({ handleCount, handleResume }: ResumeFormProps) {
+export default function ResumeForm({ handleCount }: ResumeFormProps) {
     const [resumeCount, setResumeCount] = useState<number>(1)
     const [resume, setResume] = useState<File| Experience[] | null>(null)
     const[privacy, setPrivacy] = useState<boolean>(false)
@@ -44,6 +40,8 @@ export default function ResumeForm({ handleCount, handleResume }: ResumeFormProp
                 throw new Error ("No resume uploaded.")
             }
 
+            console.log('resume to be submitted:', resume)
+
 
             if (resume instanceof File) {
                 const { resumeUrl, uploadError } = await uploadToFirebase(resume)
@@ -64,7 +62,7 @@ export default function ResumeForm({ handleCount, handleResume }: ResumeFormProp
                 setExperiences(data.experiences)
                 setResumeCount(prev => prev + 1)
             } else {
-                handleResume(resume)
+                //save part + resume to firebase
                 setResumeCount(prev => prev + 2)
             }
         } catch (error) {
@@ -76,7 +74,7 @@ export default function ResumeForm({ handleCount, handleResume }: ResumeFormProp
         }
     }
 
-    const handleRawResume = (input: File | Experience[]) => {
+    const handleRawResume = (input: File | Experience[] | null) => {
         setResume(input)
     }
 
@@ -94,9 +92,6 @@ export default function ResumeForm({ handleCount, handleResume }: ResumeFormProp
         }
     }, [resumeCount, handleCount])
 
-    useEffect(() => {
-        console.log(resume)
-    }, [resume])
 
     if (loading) {
         return(<div>Loading...</div>)

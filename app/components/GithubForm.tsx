@@ -3,21 +3,14 @@ import { useState } from 'react'
 
 interface GithubFormProps {
     handleCount : () => void;
-    handleLinkedin: (linkedin: string) => void;
-    handleLeetcode: (leetcode: string) => void;
-    handleGithub: (github: string) => void;
-
 }
 
-export default function ResumeForm({ handleCount, handleLinkedin, handleLeetcode, handleGithub }: GithubFormProps) {
+export default function ResumeForm({ handleCount }: GithubFormProps) {
     const [linkedin, setLinkedin] = useState<string>('')
     const [leetcode, setLeetcode] = useState<string>('')
     const [github, setGithub] = useState<string>('')
 
     const handleSubmit = () => {
-        handleLinkedin(linkedin)
-        handleLeetcode(leetcode)
-        handleGithub(github)
         handleCount()
     }
 
