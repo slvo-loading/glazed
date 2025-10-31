@@ -40,5 +40,5 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-#firebase
-serviceAccount.js
+# Ignore the service account file
+serviceAccount.json
